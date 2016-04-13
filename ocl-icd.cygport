@@ -3,7 +3,7 @@ VERSION=2.2.9
 RELEASE=1
 CATEGORY="Libs"
 SUMMARY="OpenCL ICD loader"
-DESCRIPTION=" OpenCL implementations are provided as ICD (Installable Client
+DESCRIPTION="OpenCL implementations are provided as ICD (Installable Client
 Driver). An OpenCL program can use several ICD thanks to the use of an ICD
 Loader as provided by this project."
 HOMEPAGE="https://forge.imag.fr/projects/ocl-icd/"
