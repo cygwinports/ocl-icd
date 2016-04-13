@@ -1,0 +1,39 @@
+NAME="ocl-icd"
+VERSION=2.2.9
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="OpenCL ICD loader"
+DESCRIPTION=" OpenCL implementations are provided as ICD (Installable Client
+Driver). An OpenCL program can use several ICD thanks to the use of an ICD
+Loader as provided by this project."
+HOMEPAGE="https://forge.imag.fr/projects/ocl-icd/"
+SRC_URI="https://forge.imag.fr/frs/download.php/716/ocl-icd-${VERSION}.tar.gz"
+PATCH_URI="
+	2.2.9-cygwin-tests.patch
+	2.2.9-no-undefined.patch
+"
+
+PKG_NAMES="libOpenCL1 libOpenCL-devel"
+libOpenCL1_REQUIRES="libpocl1" # only currently working backend
+libOpenCL1_CONTENTS="
+	usr/bin/cygOpenCL-1.dll
+	usr/share/doc/
+"
+libOpenCL_devel_CONTENTS="
+	usr/include/CL/
+	usr/include/ocl_icd.h
+	usr/lib/libOpenCL.dll.a
+	usr/lib/pkgconfig/OpenCL.pc
+	usr/lib/pkgconfig/ocl-icd.pc
+	usr/share/man/man7/libOpenCL*
+"
+
+CYGCONF_ARGS="--enable-official-khronos-headers"
+
+src_install() {
+	cd ${B}
+	cyginstall
+
+	includeinto CL
+	doinclude ${S}/khronos-headers/CL/{cl,cl_[^d]*,opencl}.h
+}

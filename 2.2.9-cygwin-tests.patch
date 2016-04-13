@@ -1,0 +1,54 @@
+--- origsrc/ocl-icd-2.2.9/Makefile.am	2015-06-08 13:25:46.734101400 -0500
++++ src/ocl-icd-2.2.9/Makefile.am	2016-04-12 16:13:58.523793300 -0500
+@@ -64,15 +64,15 @@ check_DATA = vendors/dummycl.icd vendors
+ CLEANFILES += vendors/dummycl.icd vendors/dummycl2.icd vendors/dummycl-noext.icd
+ vendors/dummycl.icd:
+ 	$(mkdir_p) vendors
+-	echo "$(CURDIR)/.libs/libdummycl.so" > $@
++	echo "$(CURDIR)/.libs/cygdummycl.dll" > $@
+ 
+ vendors/dummycl2.icd:
+ 	$(mkdir_p) vendors
+-	echo "$(CURDIR)/.libs/libdummycl2.so" > $@
++	echo "$(CURDIR)/.libs/cygdummycl2.dll" > $@
+ 
+ vendors/dummycl-noext.icd:
+ 	$(MKDIR_P) vendors
+-	echo "$(CURDIR)/.libs/libdummycl-noext.so" > $@
++	echo "$(CURDIR)/.libs/cygdummycl-noext.dll" > $@
+ 
+ clean-local: mostlyclean-generic clean-generic
+ 	-rmdir vendors
+@@ -150,7 +148,7 @@ update-database: icd_generator.rb run_du
+ 
+ .PHONY: install_test_lib uninstall_test_lib
+ install_test_lib:
+-	sudo bash -c 'echo "$(CURDIR)/.libs/libdummycl.so" > /etc/OpenCL/vendors/dummycl.icd'
++	sudo bash -c 'echo "$(CURDIR)/.libs/cygdummycl.dll" > /etc/OpenCL/vendors/dummycl.icd'
+ 
+ uninstall_test_lib:
+ 	sudo rm -f /etc/OpenCL/vendors/dummycl.icd
+--- origsrc/ocl-icd-2.2.9/icd_generator.rb	2015-12-16 08:59:05.162882700 -0600
++++ src/ocl-icd-2.2.9/icd_generator.rb	2016-04-12 15:11:13.461191100 -0500
+@@ -290,6 +290,13 @@ EOF
+ #include <stdio.h>
+ #include <dlfcn.h>
+ 
++#ifdef __CYGWIN__
++static void *RTLD_NEXT = NULL;
++#define INIT(x) if(!RTLD_NEXT) RTLD_NEXT = dlopen("cygOpenCL-1.dll", 0);
++#else
++#define INIT(x)
++#endif
++
+ EOF
+     run_dummy_icd_weak += "#pragma GCC diagnostic push\n"
+     run_dummy_icd_weak += "#  pragma GCC diagnostic ignored \"-Wcpp\"\n"
+@@ -315,6 +322,7 @@ EOF
+         first_parameter = first_parameter[0][0..-2]
+       end
+       fps = first_parameter.split
++      run_dummy_icd_weak += "  INIT()\n"
+       run_dummy_icd_weak += "  void (*p)()=dlsym(RTLD_NEXT, \"#{func_name}\");\n"
+       ps = parameters.split(",")
+       ps = ps.collect { |p|
